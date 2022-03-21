@@ -1,4 +1,3 @@
 lib/*
 *.pyc
-assets
 trained_models
