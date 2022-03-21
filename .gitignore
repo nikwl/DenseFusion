@@ -1,11 +1,4 @@
-datasets/linemod/Linemod_preprocessed
-datasets/ycb/YCB_Video_Dataset
-*.zip
-*__pycache__
-experiments/logs/*
+lib/*
 *.pyc
-lib/knn/knn_pytorch/__pycache__/*
-__init__.*
-*.pth
-YCB_Video_toolbox
-env
+assets
+trained_models
