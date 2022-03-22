@@ -13,7 +13,7 @@ import numpy.ma as ma
 import copy
 import scipy.misc
 import scipy.io as scio
-
+import trimesh
 
 class PoseDataset(data.Dataset):
     def __init__(self, mode, num_pt, add_noise, root, noise_trans, refine):
@@ -55,16 +55,20 @@ class PoseDataset(data.Dataset):
             if not class_input:
                 break
 
-            input_file = open('{0}/models/{1}/points.xyz'.format(self.root, class_input[:-1]))
-            self.cld[class_id] = []
-            while 1:
-                input_line = input_file.readline()
-                if not input_line:
-                    break
-                input_line = input_line[:-1].split(' ')
-                self.cld[class_id].append([float(input_line[0]), float(input_line[1]), float(input_line[2])])
-            self.cld[class_id] = np.array(self.cld[class_id])
-            input_file.close()
+            input_file = os.path.join(self.root, "models", "{}.ply".format(class_input))
+            mesh = trimesh.load(input_file)
+            self.cld[class_id] = np.array(mesh.vertices)
+
+            # input_file = open('{0}/models/{1}/points.xyz'.format(self.root, class_input[:-1]))
+            # self.cld[class_id] = []
+            # while 1:
+            #     input_line = input_file.readline()
+            #     if not input_line:
+            #         break
+            #     input_line = input_line[:-1].split(' ')
+            #     self.cld[class_id].append([float(input_line[0]), float(input_line[1]), float(input_line[2])])
+            # self.cld[class_id] = np.array(self.cld[class_id])
+            # input_file.close()
             
             class_id += 1
 
@@ -93,6 +97,11 @@ class PoseDataset(data.Dataset):
         self.front_num = 2
 
         print(len(self.list))
+
+        self._cache = {}
+
+    def load(self, f_in):
+        pass
 
     def __getitem__(self, index):
         img = Image.open('{0}/{1}-color.png'.format(self.root, self.list[index]))
