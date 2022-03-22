@@ -26,6 +26,8 @@ class PoseDataset(data.Dataset):
         self.add_noise = add_noise
         self.noise_trans = noise_trans
 
+        self._cache = {}
+
         self.list = []
         self.real = []
         self.syn = []
@@ -47,19 +49,33 @@ class PoseDataset(data.Dataset):
         self.len_real = len(self.real)
         self.len_syn = len(self.syn)
 
+        # >>> Load the original classes
         class_file = open('datasets/ycb/dataset_config/classes.txt')
+        class_mapping = {}
         class_id = 1
+        while 1:
+            class_input = class_file.readline()
+            if not class_input:
+                break
+            class_mapping[class_input] = class_id
+            
+            class_id += 1
+
+        # >>> Load the class subset
+        class_file = open('datasets/ycb/dataset_config/classes_subset.txt')
         self.cld = {}
         while 1:
             class_input = class_file.readline()
             if not class_input:
                 break
+            
+            # Retreive the correct id
+            class_id = class_mapping[class_input]
+            
+            # Load the points
+            input_file = '{0}/models/{1}/points.xyz'.format(self.root, class_input[:-1])
+            self.cld[class_id] = self.load(input_file)
 
-            input_file = os.path.join(self.root, "models", "{}.ply".format(class_input))
-            mesh = trimesh.load(input_file)
-            self.cld[class_id] = np.array(mesh.vertices)
-
-            # input_file = open('{0}/models/{1}/points.xyz'.format(self.root, class_input[:-1]))
             # self.cld[class_id] = []
             # while 1:
             #     input_line = input_file.readline()
@@ -69,8 +85,8 @@ class PoseDataset(data.Dataset):
             #     self.cld[class_id].append([float(input_line[0]), float(input_line[1]), float(input_line[2])])
             # self.cld[class_id] = np.array(self.cld[class_id])
             # input_file.close()
-            
-            class_id += 1
+
+        self._num_objects = len(self.cld)
 
         self.cam_cx_1 = 312.9869
         self.cam_cy_1 = 241.3109
@@ -96,18 +112,63 @@ class PoseDataset(data.Dataset):
         self.refine = refine
         self.front_num = 2
 
-        print(len(self.list))
+        print("Pruning objects from the dataset...")
+        self.prune()
 
-        self._cache = {}
+    @property
+    def num_objects(self):
+        return self._num_objects
 
     def load(self, f_in):
-        pass
+        """
+        An autocaching loader
+        """
+        if f_in not in self._cache:
+            ext = os.path.splitext(f_in)
+            if ext == ".png":
+                data = Image.open(f_in)
+            elif ext == "mat":
+                data = scio.loadmat(f_in)
+            elif ext == "xyz":
+                data = np.loadtxt(f_in, delimiter=" ")
+            elif ext == "ply":
+                data = trimesh.load(f_in).vertices.copy()
+            self._cache[f_in] = data
+        
+        return self._cache[f_in]
+    
+    def prune(self):
+        """
+        Build a remapped list of objects
+        """
+        self._remapped_getitem = []
+        for i, data in enumerate(self):
+            if data is not None:
+                self._remapped_getitem.append(i)
+
+    def get_object(self, name):
+        """
+        Return the points associated with a given model
+        """
+        return self.load('{0}/models/{1}/points.xyz'.format(self.root, name))
 
     def __getitem__(self, index):
-        img = Image.open('{0}/{1}-color.png'.format(self.root, self.list[index]))
-        depth = np.array(Image.open('{0}/{1}-depth.png'.format(self.root, self.list[index])))
-        label = np.array(Image.open('{0}/{1}-label.png'.format(self.root, self.list[index])))
-        meta = scio.loadmat('{0}/{1}-meta.mat'.format(self.root, self.list[index]))
+        # >>> Remap getitem
+        index = self._remapped_getitem[index]
+
+        img = self.load('{0}/{1}-color.png'.format(self.root, self.list[index]))
+        depth = np.array(self.load('{0}/{1}-depth.png'.format(self.root, self.list[index])))
+        label = np.array(self.load('{0}/{1}-label.png'.format(self.root, self.list[index])))
+        meta = self.load('{0}/{1}-meta.mat'.format(self.root, self.list[index]))
+
+        # >>> Check that we're training with that object
+        obj = meta['cls_indexes'].flatten().astype(np.int32)
+        object_exists = False
+        for obj_idx in obj:
+            if obj_idx in self.cld:
+                object_exists = True
+        if not object_exists:
+            return None
 
         if self.list[index][:8] != 'data_syn' and int(self.list[index][5:9]) >= 60:
             cam_cx = self.cam_cx_2
@@ -126,9 +187,9 @@ class PoseDataset(data.Dataset):
         if self.add_noise:
             for k in range(5):
                 seed = random.choice(self.syn)
-                front = np.array(self.trancolor(Image.open('{0}/{1}-color.png'.format(self.root, seed)).convert("RGB")))
+                front = np.array(self.trancolor(self.load('{0}/{1}-color.png'.format(self.root, seed)).convert("RGB")))
                 front = np.transpose(front, (2, 0, 1))
-                f_label = np.array(Image.open('{0}/{1}-label.png'.format(self.root, seed)))
+                f_label = np.array(self.load('{0}/{1}-label.png'.format(self.root, seed)))
                 front_label = np.unique(f_label).tolist()[1:]
                 if len(front_label) < self.front_num:
                    continue
@@ -149,6 +210,9 @@ class PoseDataset(data.Dataset):
 
         while 1:
             idx = np.random.randint(0, len(obj))
+            # >>> Make sure that object is one of the ones we're loading
+            if obj[idx] not in self.cld:
+                continue
             mask_depth = ma.getmaskarray(ma.masked_not_equal(depth, 0))
             mask_label = ma.getmaskarray(ma.masked_equal(label, obj[idx]))
             mask = mask_label * mask_depth
@@ -163,7 +227,7 @@ class PoseDataset(data.Dataset):
 
         if self.list[index][:8] == 'data_syn':
             seed = random.choice(self.real)
-            back = np.array(self.trancolor(Image.open('{0}/{1}-color.png'.format(self.root, seed)).convert("RGB")))
+            back = np.array(self.trancolor(self.load('{0}/{1}-color.png'.format(self.root, seed)).convert("RGB")))
             back = np.transpose(back, (2, 0, 1))[:, rmin:rmax, cmin:cmax]
             img_masked = back * mask_back[rmin:rmax, cmin:cmax] + img
         else:
@@ -241,7 +305,9 @@ class PoseDataset(data.Dataset):
                torch.LongTensor([int(obj[idx]) - 1])
 
     def __len__(self):
-        return self.length
+        # return self.length
+        # >>> Account for skipped samples
+        return len(self._remapped_getitem)
 
     def get_sym_list(self):
         return self.symmetry_obj_idx
