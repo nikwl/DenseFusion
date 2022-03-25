@@ -28,6 +28,7 @@ class PoseDataset(data.Dataset):
         self.noise_trans = noise_trans
 
         self._cache = {}
+        self._do_caching = True
 
         self.list = []
         self.real = []
@@ -136,6 +137,8 @@ class PoseDataset(data.Dataset):
                 data = trimesh.load(f_in).vertices.copy()
             else:
                 raise RuntimeError("Unknown extension: {}".format(ext))
+            if not self._do_caching:
+                return data
             self._cache[f_in] = data
         
         return self._cache[f_in]
@@ -145,6 +148,7 @@ class PoseDataset(data.Dataset):
         Build a remapped list of objects
         """
         self._remapped_getitem = None
+        self._do_caching = False
         remapped_getitem = []
         for i in tqdm.tqdm(range(len(self))):
             try:
@@ -154,6 +158,7 @@ class PoseDataset(data.Dataset):
             if data is not None:
                 remapped_getitem.append(i)
         self._remapped_getitem = remapped_getitem
+        self._do_caching = True
         print("Retained {} / {} samples".format(len(self), self.length))
 
     def get_object(self, name):
