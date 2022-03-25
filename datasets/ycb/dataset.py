@@ -14,6 +14,7 @@ import copy
 import scipy.misc
 import scipy.io as scio
 import trimesh
+import tqdm
 
 class PoseDataset(data.Dataset):
     def __init__(self, mode, num_pt, add_noise, root, noise_trans, refine):
@@ -124,15 +125,17 @@ class PoseDataset(data.Dataset):
         An autocaching loader
         """
         if f_in not in self._cache:
-            ext = os.path.splitext(f_in)
+            ext = os.path.splitext(f_in)[-1]
             if ext == ".png":
                 data = Image.open(f_in)
-            elif ext == "mat":
+            elif ext == ".mat":
                 data = scio.loadmat(f_in)
-            elif ext == "xyz":
+            elif ext == ".xyz":
                 data = np.loadtxt(f_in, delimiter=" ")
-            elif ext == "ply":
+            elif ext == ".ply":
                 data = trimesh.load(f_in).vertices.copy()
+            else:
+                raise RuntimeError("Unknown extension: {}".format(ext))
             self._cache[f_in] = data
         
         return self._cache[f_in]
@@ -141,10 +144,17 @@ class PoseDataset(data.Dataset):
         """
         Build a remapped list of objects
         """
-        self._remapped_getitem = []
-        for i, data in enumerate(self):
+        self._remapped_getitem = None
+        remapped_getitem = []
+        for i in tqdm.tqdm(range(len(self))):
+            try:
+                data = self[i]
+            except FileNotFoundError:
+                continue
             if data is not None:
-                self._remapped_getitem.append(i)
+                remapped_getitem.append(i)
+        self._remapped_getitem = remapped_getitem
+        print("Retained {} / {} samples".format(len(self), self.length))
 
     def get_object(self, name):
         """
@@ -154,7 +164,8 @@ class PoseDataset(data.Dataset):
 
     def __getitem__(self, index):
         # >>> Remap getitem
-        index = self._remapped_getitem[index]
+        if self._remapped_getitem is not None:
+            index = self._remapped_getitem[index]
 
         img = self.load('{0}/{1}-color.png'.format(self.root, self.list[index]))
         depth = np.array(self.load('{0}/{1}-depth.png'.format(self.root, self.list[index])))
@@ -169,6 +180,8 @@ class PoseDataset(data.Dataset):
                 object_exists = True
         if not object_exists:
             return None
+        if self._remapped_getitem is not None:
+            return True
 
         if self.list[index][:8] != 'data_syn' and int(self.list[index][5:9]) >= 60:
             cam_cx = self.cam_cx_2
@@ -307,6 +320,8 @@ class PoseDataset(data.Dataset):
     def __len__(self):
         # return self.length
         # >>> Account for skipped samples
+        if self._remapped_getitem is None:
+            return self.length
         return len(self._remapped_getitem)
 
     def get_sym_list(self):

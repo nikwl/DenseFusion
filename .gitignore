@@ -1,5 +1,4 @@
 lib/*
 *.pyc
 trained_models
-experiments
-experiments_v2
+trained_models_v2

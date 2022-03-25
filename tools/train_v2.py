@@ -46,8 +46,8 @@ parser.add_argument('--resume_refinenet', type=str, default = '',  help='resume 
 parser.add_argument('--start_epoch', type=int, default = 1, help='which epoch to start')
 # >>> Moved these arguments to be passable
 parser.add_argument('--num_points', type=int, default = 1000, help='number of points on the input pointcloud')
-parser.add_argument('--outf', type=int, default = 'trained_models/ycb', help='folder to save trained models')
-parser.add_argument('--log_dir', type=int, default = 'experiments/logs/ycb', help='folder to save logs')
+parser.add_argument('--outf', type=str, default = 'trained_models/ycb', help='folder to save trained models')
+parser.add_argument('--log_dir', type=str, default = 'experiments/logs/ycb', help='folder to save logs')
 parser.add_argument('--repeat_epochs', type=int, default = 1, help='number of repeat times for one epoch training')
 opt = parser.parse_args()
 
