@@ -1,4 +1,5 @@
-lib/*
+*.egg*
+*.so
 *.pyc
 trained_models
 trained_models_v2
