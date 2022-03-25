@@ -1,5 +1,6 @@
 *.egg*
 *.so
 *.pyc
+*.o
 trained_models
 trained_models_v2
