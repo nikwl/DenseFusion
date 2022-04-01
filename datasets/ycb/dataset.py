@@ -114,8 +114,12 @@ class PoseDataset(data.Dataset):
         self.refine = refine
         self.front_num = 2
 
-        print("Pruning objects from the dataset...")
-        self.prune()
+        # self[len(self)-1]
+
+        # print("Pruning objects from the dataset...")
+        # self._remapped_getitem = None
+        # print("Using {} objects".format(self._num_objects))
+        # self.prune()
 
     @property
     def num_objects(self):
@@ -147,13 +151,14 @@ class PoseDataset(data.Dataset):
         """
         Build a remapped list of objects
         """
-        self._remapped_getitem = None
         self._do_caching = False
         remapped_getitem = []
-        for i in tqdm.tqdm(range(len(self))):
+        pbar = tqdm.tqdm(range(len(self)))
+        for i in pbar:
             try:
                 data = self[i]
             except FileNotFoundError:
+                pbar.write("FileNotFoundError: {}".format(i))
                 continue
             if data is not None:
                 remapped_getitem.append(i)
@@ -169,24 +174,28 @@ class PoseDataset(data.Dataset):
 
     def __getitem__(self, index):
         # >>> Remap getitem
-        if self._remapped_getitem is not None:
-            index = self._remapped_getitem[index]
+        # if self._remapped_getitem is not None:
+        #     index = self._remapped_getitem[index]
 
-        img = self.load('{0}/{1}-color.png'.format(self.root, self.list[index]))
-        depth = np.array(self.load('{0}/{1}-depth.png'.format(self.root, self.list[index])))
-        label = np.array(self.load('{0}/{1}-label.png'.format(self.root, self.list[index])))
-        meta = self.load('{0}/{1}-meta.mat'.format(self.root, self.list[index]))
+        try:
+            img = self.load('{0}/{1}-color.png'.format(self.root, self.list[index]))
+            depth = np.array(self.load('{0}/{1}-depth.png'.format(self.root, self.list[index])))
+            label = np.array(self.load('{0}/{1}-label.png'.format(self.root, self.list[index])))
+            meta = self.load('{0}/{1}-meta.mat'.format(self.root, self.list[index]))
+        except FileNotFoundError:
+            print("FileNotFoundError: {}/{}".format(self.root, self.list[index]))
+            return self[index+1]
 
         # >>> Check that we're training with that object
-        obj = meta['cls_indexes'].flatten().astype(np.int32)
-        object_exists = False
-        for obj_idx in obj:
-            if obj_idx in self.cld:
-                object_exists = True
-        if not object_exists:
-            return None
-        if self._remapped_getitem is not None:
-            return True
+        # obj = meta['cls_indexes'].flatten().astype(np.int32)
+        # if self._remapped_getitem is None:
+        #     object_exists = False
+        #     for obj_idx in obj:
+        #         if obj_idx in self.cld:
+        #             object_exists = True
+        #     if not object_exists:
+        #         return None
+        #     return True
 
         if self.list[index][:8] != 'data_syn' and int(self.list[index][5:9]) >= 60:
             cam_cx = self.cam_cx_2
@@ -323,11 +332,11 @@ class PoseDataset(data.Dataset):
                torch.LongTensor([int(obj[idx]) - 1])
 
     def __len__(self):
-        # return self.length
+        return self.length
         # >>> Account for skipped samples
-        if self._remapped_getitem is None:
-            return self.length
-        return len(self._remapped_getitem)
+        # if self._remapped_getitem is None:
+        #     return self.length
+        # return len(self._remapped_getitem)
 
     def get_sym_list(self):
         return self.symmetry_obj_idx

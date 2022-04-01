@@ -20,12 +20,16 @@ import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
 from torch.autograd import Variable
+# from torch import Tensor as Variable
 from datasets.ycb.dataset import PoseDataset as PoseDataset_ycb
 from datasets.linemod.dataset import PoseDataset as PoseDataset_linemod
 from lib.network import PoseNet, PoseRefineNet
 from lib.loss import Loss
 from lib.loss_refiner import Loss_refine
 from lib.utils import setup_logger
+
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning) 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', type=str, default = 'ycb', help='ycb or linemod')
@@ -48,7 +52,7 @@ parser.add_argument('--start_epoch', type=int, default = 1, help='which epoch to
 parser.add_argument('--num_points', type=int, default = 1000, help='number of points on the input pointcloud')
 parser.add_argument('--outf', type=str, default = 'trained_models/ycb', help='folder to save trained models')
 parser.add_argument('--log_dir', type=str, default = 'experiments/logs/ycb', help='folder to save logs')
-parser.add_argument('--repeat_epochs', type=int, default = 1, help='number of repeat times for one epoch training')
+parser.add_argument('--repeat_epoch', type=int, default = 1, help='number of repeat times for one epoch training')
 opt = parser.parse_args()
 
 
@@ -58,7 +62,7 @@ def main():
     torch.manual_seed(opt.manualSeed)
 
     if opt.dataset == 'ycb':
-        opt.num_objects = 5 #number of object classes in the dataset
+        opt.num_objects = 21 #number of object classes in the dataset
         # opt.num_points = 1000 #number of points on the input pointcloud
         # opt.outf = 'trained_models/ycb' #folder to save trained models
         # opt.log_dir = 'experiments/logs/ycb' #folder to save logs
@@ -75,8 +79,12 @@ def main():
         return
 
     estimator = PoseNet(num_points = opt.num_points, num_obj = opt.num_objects)
-    estimator.cuda()
     refiner = PoseRefineNet(num_points = opt.num_points, num_obj = opt.num_objects)
+    if torch.cuda.device_count() > 1:
+        print("Let's use", torch.cuda.device_count(), "GPUs!")
+        estimator = torch.nn.DataParallel(estimator)
+        refiner = torch.nn.DataParallel(refiner)
+    estimator.cuda()
     refiner.cuda()
 
     if opt.resume_posenet != '':
