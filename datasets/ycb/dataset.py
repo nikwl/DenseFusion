@@ -189,6 +189,8 @@ class PoseDataset(data.Dataset):
         # if self._remapped_getitem is not None:
         #     index = self._remapped_getitem[index]
 
+        index = 0
+
         if hasattr(self, "list_rgb"):
             img = self.list_rgb[:, :, :, index]
             img = Image.fromarray(img)

@@ -96,7 +96,7 @@ def main():
         opt.decay_start = True
         opt.lr *= opt.lr_rate
         opt.w *= opt.w_rate
-        opt.batch_size = int(opt.batch_size / opt.iteration)
+        # opt.batch_size = int(opt.batch_size / opt.iteration)
         optimizer = optim.Adam(refiner.parameters(), lr=opt.lr)
     else:
         opt.refine_start = False
@@ -107,12 +107,12 @@ def main():
         dataset = PoseDataset_ycb('train', opt.num_points, True, opt.dataset_root, opt.noise_trans, opt.refine_start)
     elif opt.dataset == 'linemod':
         dataset = PoseDataset_linemod('train', opt.num_points, True, opt.dataset_root, opt.noise_trans, opt.refine_start)
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=True, num_workers=opt.workers)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=opt.workers)
     if opt.dataset == 'ycb':
         test_dataset = PoseDataset_ycb('test', opt.num_points, False, opt.dataset_root, 0.0, opt.refine_start)
     elif opt.dataset == 'linemod':
         test_dataset = PoseDataset_linemod('test', opt.num_points, False, opt.dataset_root, 0.0, opt.refine_start)
-    testdataloader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=opt.workers)
+    testdataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size, shuffle=False, num_workers=opt.workers)
     
     # >>> Added this assertion
     assert opt.num_objects == dataset.num_objects
@@ -167,7 +167,7 @@ def main():
                 train_dis_avg += dis.item()
                 train_count += 1
 
-                if train_count % opt.batch_size == 0:
+                if train_count % 100 == 0:
                     logger.info('Train time {0} Epoch {1} Batch {2} Frame {3} Avg_dis:{4}'.format(time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - st_time)), epoch, int(train_count / opt.batch_size), train_count, train_dis_avg / opt.batch_size))
                     optimizer.step()
                     optimizer.zero_grad()
