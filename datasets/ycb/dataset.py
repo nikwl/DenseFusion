@@ -171,7 +171,7 @@ class PoseDataset(data.Dataset):
     def load_npy(self):
         print("Loading numpy data ...")
         self.list_rgb = np.load(self.root + "/list_rgb.npy")
-        print("list_rgb: {}".format(lself.list_rgb.shape[-1]))
+        print("list_rgb: {}".format(self.list_rgb.shape[-1]))
         print("list: {}".format(len(self.list)))
         assert len(self.list) == self.list_rgb.shape[-1]
         self.list_depth = np.load(self.root + "/list_depth.npy")
