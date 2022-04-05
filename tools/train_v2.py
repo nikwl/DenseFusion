@@ -197,6 +197,10 @@ def main():
                                                              Variable(target).cuda(), \
                                                              Variable(model_points).cuda(), \
                                                              Variable(idx).cuda()
+            print(img.device)
+            print(points.device)
+            print(choose.device)
+            print(idx.device)
             pred_r, pred_t, pred_c, emb = estimator(img, points, choose, idx)
             _, dis, new_points, new_target = criterion(pred_r, pred_t, pred_c, target, model_points, idx, points, opt.w, opt.refine_start)
 
