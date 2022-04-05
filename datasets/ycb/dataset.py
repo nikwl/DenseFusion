@@ -19,9 +19,9 @@ import tqdm
 class PoseDataset(data.Dataset):
     def __init__(self, mode, num_pt, add_noise, root, noise_trans, refine):
         if mode == 'train':
-            self.path = 'datasets/ycb/dataset_config/train_data_list.txt'
+            self.path = root + '/dataset_config/train_data_list_subset_half.txt'
         elif mode == 'test':
-            self.path = 'datasets/ycb/dataset_config/test_data_list.txt'
+            self.path = root + '/dataset_config/test_data_list.txt'
         self.num_pt = num_pt
         self.root = root
         self.add_noise = add_noise
@@ -34,6 +34,7 @@ class PoseDataset(data.Dataset):
         self.real = []
         self.syn = []
         input_file = open(self.path)
+        print("reading file list...")
         while 1:
             input_line = input_file.readline()
             if not input_line:
@@ -115,11 +116,11 @@ class PoseDataset(data.Dataset):
         self.front_num = 2
 
         # self[len(self)-1]
-
         # print("Pruning objects from the dataset...")
         # self._remapped_getitem = None
         # print("Using {} objects".format(self._num_objects))
         # self.prune()
+        self.load_npy()
 
     @property
     def num_objects(self):
@@ -166,6 +167,14 @@ class PoseDataset(data.Dataset):
         self._do_caching = True
         print("Retained {} / {} samples".format(len(self), self.length))
 
+    def load_npy(self):
+        print("Loading numpy data ...")
+        self.list_rgb = np.load(self.root + "/list_rgb.npy")
+        assert len(self.list) == len(self.list_rgb)
+        self.list_depth = np.load(self.root + "/list_depth.npy")
+        self.list_label = np.load(self.root + "/list_label.npy")
+        self.list_meta = np.load(self.root + "/list_meta.npy")
+
     def get_object(self, name):
         """
         Return the points associated with a given model
@@ -177,14 +186,21 @@ class PoseDataset(data.Dataset):
         # if self._remapped_getitem is not None:
         #     index = self._remapped_getitem[index]
 
-        try:
-            img = self.load('{0}/{1}-color.png'.format(self.root, self.list[index]))
-            depth = np.array(self.load('{0}/{1}-depth.png'.format(self.root, self.list[index])))
-            label = np.array(self.load('{0}/{1}-label.png'.format(self.root, self.list[index])))
-            meta = self.load('{0}/{1}-meta.mat'.format(self.root, self.list[index]))
-        except FileNotFoundError:
-            print("FileNotFoundError: {}/{}".format(self.root, self.list[index]))
-            return self[index+1]
+        if hasattr(self, "list_rgb"):
+            img = self.list_rgb[:, :, :, index]
+            img = Image.fromarray(img)
+            depth = self.list_depth[:, :, index]
+            label = self.list_label[:, :, index]
+            meta = self.list_meta[index]
+        else:
+            try:
+                img = self.load('{0}/{1}-color.png'.format(self.root, self.list[index]))
+                depth = np.array(self.load('{0}/{1}-depth.png'.format(self.root, self.list[index])))
+                label = np.array(self.load('{0}/{1}-label.png'.format(self.root, self.list[index])))
+                meta = self.load('{0}/{1}-meta.mat'.format(self.root, self.list[index]))
+            except FileNotFoundError:
+                print("FileNotFoundError: {}/{}".format(self.root, self.list[index]))
+                return self[index+1]
 
         # >>> Check that we're training with that object
         # obj = meta['cls_indexes'].flatten().astype(np.int32)
