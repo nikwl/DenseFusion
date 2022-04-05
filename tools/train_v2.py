@@ -80,12 +80,12 @@ def main():
 
     estimator = PoseNet(num_points = opt.num_points, num_obj = opt.num_objects)
     refiner = PoseRefineNet(num_points = opt.num_points, num_obj = opt.num_objects)
+    estimator.cuda()
+    refiner.cuda()
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         estimator = torch.nn.DataParallel(estimator)
         refiner = torch.nn.DataParallel(refiner)
-    estimator.cuda()
-    refiner.cuda()
 
     if opt.resume_posenet != '':
         estimator.load_state_dict(torch.load('{0}/{1}'.format(opt.outf, opt.resume_posenet)))
@@ -197,10 +197,6 @@ def main():
                                                              Variable(target).cuda(), \
                                                              Variable(model_points).cuda(), \
                                                              Variable(idx).cuda()
-            print(img.device)
-            print(points.device)
-            print(choose.device)
-            print(idx.device)
             pred_r, pred_t, pred_c, emb = estimator(img, points, choose, idx)
             _, dis, new_points, new_target = criterion(pred_r, pred_t, pred_c, target, model_points, idx, points, opt.w, opt.refine_start)
 

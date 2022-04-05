@@ -189,9 +189,6 @@ class PoseDataset(data.Dataset):
         # if self._remapped_getitem is not None:
         #     index = self._remapped_getitem[index]
 
-        index = 0
-        print(index)
-
         if hasattr(self, "list_rgb"):
             img = self.list_rgb[:, :, :, index]
             img = Image.fromarray(img)
@@ -259,7 +256,6 @@ class PoseDataset(data.Dataset):
 
         while 1:
             idx = np.random.randint(0, len(obj))
-            idx = 0
             # >>> Make sure that object is one of the ones we're loading
             if obj[idx] not in self.cld:
                 continue
