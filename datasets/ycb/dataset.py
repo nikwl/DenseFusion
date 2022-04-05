@@ -176,7 +176,7 @@ class PoseDataset(data.Dataset):
         # assert len(self.list) == self.list_rgb.shape[-1]
         self.list_depth = np.load(self.root + "/list_depth.npy")
         self.list_label = np.load(self.root + "/list_label.npy")
-        self.list_meta = np.load(self.root + "/list_meta.npy")
+        self.list_meta = np.load(self.root + "/list_meta.npy", allow_pickle=True)
 
     def get_object(self, name):
         """
