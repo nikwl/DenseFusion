@@ -120,7 +120,8 @@ class PoseDataset(data.Dataset):
         # self._remapped_getitem = None
         # print("Using {} objects".format(self._num_objects))
         # self.prune()
-        self.load_npy()
+        if mode == "train":
+            self.load_npy()
 
     @property
     def num_objects(self):
