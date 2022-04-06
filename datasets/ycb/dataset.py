@@ -234,9 +234,12 @@ class PoseDataset(data.Dataset):
         if self.add_noise:
             for k in range(5):
                 seed = random.choice(self.syn)
-                front = np.array(self.trancolor(self.load('{0}/{1}-color.png'.format(self.root, seed)).convert("RGB")))
+                # temp_img = self.load('{0}/{1}-color.png'.format(self.root, seed))
+                temp_img = self.list_rgb[:, :, :, seed]
+                front = np.array(self.trancolor(temp_img).convert("RGB"))
                 front = np.transpose(front, (2, 0, 1))
-                f_label = np.array(self.load('{0}/{1}-label.png'.format(self.root, seed)))
+                # f_label = np.array(self.load('{0}/{1}-label.png'.format(self.root, seed)))
+                f_label = self.list_label[:, :, index]
                 front_label = np.unique(f_label).tolist()[1:]
                 if len(front_label) < self.front_num:
                    continue
@@ -274,7 +277,9 @@ class PoseDataset(data.Dataset):
 
         if self.list[index][:8] == 'data_syn':
             seed = random.choice(self.real)
-            back = np.array(self.trancolor(self.load('{0}/{1}-color.png'.format(self.root, seed)).convert("RGB")))
+            # temp_img = self.load('{0}/{1}-color.png'.format(self.root, seed)
+            temp_img = self.list_rgb[:, :, :, index]
+            back = np.array(self.trancolor(temp_img).convert("RGB")))
             back = np.transpose(back, (2, 0, 1))[:, rmin:rmax, cmin:cmax]
             img_masked = back * mask_back[rmin:rmax, cmin:cmax] + img
         else:
