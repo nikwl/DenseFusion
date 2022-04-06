@@ -177,6 +177,7 @@ class PoseDataset(data.Dataset):
         self.list_depth = np.load(self.root + "/list_depth.npy")
         self.list_label = np.load(self.root + "/list_label.npy")
         self.list_meta = np.load(self.root + "/list_meta.npy", allow_pickle=True)
+        self.length = self.list_rgb.shape[-1]
 
     def get_object(self, name):
         """
@@ -277,9 +278,9 @@ class PoseDataset(data.Dataset):
 
         if self.list[index][:8] == 'data_syn':
             seed = random.choice(self.real)
-            # temp_img = self.load('{0}/{1}-color.png'.format(self.root, seed)
+            # temp_img = self.load('{0}/{1}-color.png'.format(self.root, seed))
             temp_img = self.list_rgb[:, :, :, index]
-            back = np.array(self.trancolor(temp_img).convert("RGB")))
+            back = np.array(self.trancolor(temp_img).convert("RGB"))
             back = np.transpose(back, (2, 0, 1))[:, rmin:rmax, cmin:cmax]
             img_masked = back * mask_back[rmin:rmax, cmin:cmax] + img
         else:
