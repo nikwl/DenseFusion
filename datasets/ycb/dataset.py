@@ -35,6 +35,7 @@ class PoseDataset(data.Dataset):
         self.syn = []
         input_file = open(self.path)
         print("reading file list...")
+        idx = 0
         while 1:
             input_line = input_file.readline()
             if not input_line:
@@ -42,10 +43,11 @@ class PoseDataset(data.Dataset):
             if input_line[-1:] == '\n':
                 input_line = input_line[:-1]
             if input_line[:5] == 'data/':
-                self.real.append(input_line)
+                self.real.append(idx)
             else:
-                self.syn.append(input_line)
+                self.syn.append(idx)
             self.list.append(input_line)
+            idx += 1
         input_file.close()
 
         self.length = len(self.list)
