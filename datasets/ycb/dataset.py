@@ -196,6 +196,7 @@ class PoseDataset(data.Dataset):
             label = self.list_label[:, :, index]
             meta = self.list_meta[index]
         else:
+            print("Loading from disk...")
             try:
                 img = self.load('{0}/{1}-color.png'.format(self.root, self.list[index]))
                 depth = np.array(self.load('{0}/{1}-depth.png'.format(self.root, self.list[index])))
