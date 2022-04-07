@@ -220,16 +220,19 @@ class PoseDataset(data.Dataset):
         #         return None
         #     return True
 
-        if self.list[index][:8] != 'data_syn' and int(self.list[index][5:9]) >= 60:
-            cam_cx = self.cam_cx_2
-            cam_cy = self.cam_cy_2
-            cam_fx = self.cam_fx_2
-            cam_fy = self.cam_fy_2
-        else:
-            cam_cx = self.cam_cx_1
-            cam_cy = self.cam_cy_1
-            cam_fx = self.cam_fx_1
-            cam_fy = self.cam_fy_1
+        try:
+            if self.list[index][:8] != 'data_syn' and int(self.list[index][5:9]) >= 60:
+                cam_cx = self.cam_cx_2
+                cam_cy = self.cam_cy_2
+                cam_fx = self.cam_fx_2
+                cam_fy = self.cam_fy_2
+            else:
+                cam_cx = self.cam_cx_1
+                cam_cy = self.cam_cy_1
+                cam_fx = self.cam_fx_1
+                cam_fy = self.cam_fy_1
+        except ValueError:
+            return self[index-1]
 
         mask_back = ma.getmaskarray(ma.masked_equal(label, 0))
 
