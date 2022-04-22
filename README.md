@@ -7,7 +7,31 @@ NOTE: Azure kinect sensor is required.
 
 Use (this mirror)[https://okabe.dev/ycb-video-dataset-download-mirror/] to download the YCB_Video dataset.
 
-### (1) Installing the Azure Kinect
+### (1) (Optional) Using Windows via WSL
+
+PCs need to be updated to at minimum <b>Version 21H2 (OS Build 19041)</b> \
+To check the version, open the Run window (win+r), and run `winver`. \
+Use windows update to update to the correct version. You may need to check for updates and restart multiple times. \
+
+Open a powershell instance with administrator privileges. Then run:
+```powershell
+# Install wsl
+wsl --install -d Ubuntu
+```
+
+Create a default user inside of wsl2. Run the following in powershell to start wsl:
+```powershell
+wsl
+```
+
+NOTE: If `sudo apt-get update` fails to resolve links, change the nameserver version in /etc/resolv.conf to 8.8.8.8:
+```powershell
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
+```
+
+Install docker desktop from [HERE](https://www.docker.com/products/docker-desktop/). Then go to Settings > Resources > WSL INTEGRATION and enable docker inside of the `Ubuntu` distro. See (this guide for troubleshooting)[https://docs.docker.com/desktop/windows/wsl/].
+
+### (2) Installing the Azure Kinect
 
 Install apt dependencies (OpenSSL and OpenGL).
 ```bash 
@@ -48,30 +72,6 @@ Now test the camera.
 python test_cam.py --visualize
 ```
 
-### (2) (Optional) Using Windows via WSL
-
-PCs need to be updated to at minimum <b>Version 21H2 (OS Build 19041)</b> \
-To check the version, open the Run window (win+r), and run `winver`. \
-Use windows update to update to the correct version. You may need to check for updates and restart multiple times. \
-
-Open a powershell instance with administrator privileges. Then run:
-```powershell
-# Install wsl
-wsl --install -d Ubuntu
-```
-
-Create a default user inside of wsl2. Run the following in powershell to start wsl:
-```powershell
-wsl
-```
-
-NOTE: If `sudo apt-get update` fails to resolve links, change the nameserver version in /etc/resolv.conf to 8.8.8.8:
-```powershell
-echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
-```
-
-Install docker desktop from [HERE](https://www.docker.com/products/docker-desktop/). Then go to Settings > Resources > WSL INTEGRATION and enable docker inside of the `Ubuntu` distro. See (this guide for troubleshooting)[https://docs.docker.com/desktop/windows/wsl/].
-
 ### (3) Installing nvidia-docker
 
 Make sure curl is installed.
@@ -79,7 +79,7 @@ Make sure curl is installed.
 sudo apt install curl
 ```
 
-Install docker using the (convenience script)[https://docs.docker.com/engine/install/ubuntu/].
+Install docker using the (convenience script)[https://docs.docker.com/engine/install/ubuntu/]. DO NOT do this step if you've installed docker desktop.
 ```bash 
 curl https://get.docker.com | sh \
     && sudo systemctl --now enable docker
