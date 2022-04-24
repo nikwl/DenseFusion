@@ -69,7 +69,7 @@ pip install open3d opencv-python pillow
 
 Now test the camera.
 ```bash
-python test_cam.py --visualize
+python capture.py --visualize
 ```
 
 ### (3) Installing nvidia-docker
@@ -163,9 +163,15 @@ Once you've entered into the docker container, run the setup script to pull the 
 ./setup.sh
 ```
 
+After install steps
+```
+pip install gdown
+python download.py
+```
+
 ## Operating procedure
 
-### (1) Collect images using `test_cam.py`
+### (1) Collect images using `capture.py`
 
 Create a test directory to store the images in.
 ```bash
@@ -174,7 +180,7 @@ mkdir trail_run
 
 Record some images.
 ```bash
-python test_cam.py --output trail_run --visualize
+python capture.py --output trail_run --visualize
 ```
 
 Run the segmentation algorithm. 

@@ -60,7 +60,7 @@ def pose_refine_net_pretrained_model_path(dataset='ycb'):
         )
     return model_path
 
+print("Downloading posenet...")
 p = pose_net_pretrained_model_path()
-print(p)
+print("Downloading refinenet...")
 p = pose_refine_net_pretrained_model_path()
-print(p)

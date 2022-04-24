@@ -3,8 +3,30 @@ import os
 
 import numpy as np
 import open3d as o3d
+from matplotlib import cm
 from PIL import Image
 import cv2
+
+
+def colorize_image(img, cmap="jet", vmin=None, vmax=None):
+    assert len(img.shape) < 3
+
+    # Get the min and max
+    if vmin is None:
+        vmin = img.min()
+    if vmax is None:
+        vmax = img.max()
+
+    # Clip and rescale
+    img = np.clip((img - vmin) / (vmax - vmin), 0.0, 1.0)
+
+    if cmap is None or cmap == "None":
+        return (np.dstack((img, img, img, np.ones((img.shape)))) * 255).astype(np.uint8)
+
+    cmap = cm.get_cmap(cmap)
+
+    # Apply the colormap
+    return (cmap(img) * 255).astype(np.uint8)
 
 
 if __name__ == "__main__":
@@ -41,23 +63,31 @@ if __name__ == "__main__":
         if rgbd is None:
             continue
 
-        color = np.array(rgbd.color)
-        depth = np.array(rgbd.depth, dtype=np.uint16)
-
-        color = Image.fromarray(color).resize((640, 480))
-        depth = Image.fromarray(depth).resize((640, 480))
+        color = cv2.resize(
+            np.array(rgbd.color), 
+            (640, 480)
+        )
+        depth = cv2.resize(
+            np.array(rgbd.depth, dtype=np.uint16), 
+            (640, 480)
+        )
 
         if args.visualize:
             cv2.imshow(
                 "kinect stream", 
-                cv2.cvtColor(color, cv2.COLOR_BGR2RGB)
+                np.hstack((
+                    cv2.cvtColor(color, cv2.COLOR_BGR2RGB),
+                    colorize_image(depth, cmap="gray")[:, :, :3],
+                ))
             )
+            if cv2.waitKey(33) == ord("q"):
+                break
 
         if args.output is not None:
-            color.save(
+            Image.fromarray(color).save(
                 os.path.join(args.output, "color_" + str(idx) + ".png")
             )
-            depth.save(
+            Image.fromarray(depth).save(
                 os.path.join(args.output, "depth_" + str(idx) + ".png")
             )
         idx += 1
