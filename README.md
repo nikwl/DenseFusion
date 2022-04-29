@@ -193,12 +193,12 @@ Run the segmentation algorithm.
 
 Run the pose estimation algorithm in docker.
 ```bash
-./estimate.sh trial_run
+./eval_real.sh trial_run
 ```
 
 Run the pose visualization.
 ```bash
-python tools/gif.py --input trial_run
+./gif_real.sh trial_run
 ```
 
 Open up the `trial_run.gif` to see the results.
