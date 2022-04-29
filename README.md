@@ -164,10 +164,12 @@ Once you've entered into the docker container, run the setup script to pull the 
 ./setup.sh
 ```
 
-After install steps
+Then run the following commands (TODO: roll into the docker image)
 ```
+cd opt/ws/DenseFusion
+pip install gdown trimesh pillow==6.1 pyrender
 python download.py
-pip install gdown trimesh pillow==6.1
+./download.sh
 apt install -y freeglut3-dev freeglut3 libgl1-mesa-dev libglu1-mesa-dev libxext-dev libxt-dev
 apt install -y python3-opengl libgl1-mesa-glx libglu1-mesa
 ```
@@ -188,7 +190,7 @@ python capture.py --output trial_run --visualize
 
 Run the segmentation algorithm. 
 ```bash
-<TODO>
+TODO
 ```
 
 Run the pose estimation algorithm in docker.
