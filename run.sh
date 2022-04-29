@@ -1,0 +1,1 @@
+/home/nikolas/dev/data4/DenseFusion/YCB_dataset/models

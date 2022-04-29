@@ -8,7 +8,7 @@ trial_run
 models
 
 YCB_Video_toolbox
-*trial
-*test
+*trial*
+*test*
 
 datasets/linemod/Linemod_preprocessed
