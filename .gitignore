@@ -5,3 +5,10 @@
 trained_models
 trained_models_v2
 trial_run
+models
+
+YCB_Video_toolbox
+*trial
+*test
+
+datasets/linemod/Linemod_preprocessed
