@@ -31,7 +31,7 @@ NOTE: If `sudo apt-get update` fails to resolve links, change the nameserver ver
 echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
 ```
 
-Install docker desktop from [HERE](https://www.docker.com/products/docker-desktop/). Then go to Settings > Resources > WSL INTEGRATION and enable docker inside of the `Ubuntu` distro. See (this guide for troubleshooting)[https://docs.docker.com/desktop/windows/wsl/].
+Install docker desktop from [HERE](https://www.docker.com/products/docker-desktop/). Then go to Settings > Resources > WSL INTEGRATION and enable docker inside of the `Ubuntu` distro. See [this guide for troubleshooting](datasets/linemod/Linemod_preprocessed/data/01/depth/0001.pnghttps://docs.docker.com/desktop/windows/wsl/).
 
 ### (2) Installing the Azure Kinect
 
@@ -41,7 +41,7 @@ sudo apt-get install libssl-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev
 ```
 
 Configure Microsoft's Software repository. \
-Follow the (official installation instructions)[https://docs.microsoft.com/en-us/azure/kinect-dk/sensor-sdk-download]
+Follow the [official installation instructions](https://docs.microsoft.com/en-us/azure/kinect-dk/sensor-sdk-download)
 ```bash
 curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 sudo apt-add-repository https://packages.microsoft.com/ubuntu/18.04/prod
@@ -81,13 +81,13 @@ Make sure curl is installed.
 sudo apt install curl
 ```
 
-Install docker using the (convenience script)[https://docs.docker.com/engine/install/ubuntu/]. DO NOT do this step if you've installed docker desktop.
+Install docker using the [convenience script](https://docs.docker.com/engine/install/ubuntu/). DO NOT do this step if you've installed docker desktop.
 ```bash 
 curl https://get.docker.com | sh \
     && sudo systemctl --now enable docker
 ```
 
-Install nvidia-docker following the (official installation instructions)[https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html]. \
+Install nvidia-docker following the [official installation instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html). \
 Setup the package repository and the GPG key.
 ```bash 
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
