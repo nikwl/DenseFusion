@@ -7,7 +7,7 @@
 Tested on Ubutnu 18.04 with python 3.6.9. We also include instructions on how to install wsl in case you need to train or test the approach and do not have access to an ubuntu machine.
 NOTE: Azure kinect sensor is required.
 
-Use (this mirror)[https://okabe.dev/ycb-video-dataset-download-mirror/] to download the YCB_Video dataset.
+Use [this mirror](https://okabe.dev/ycb-video-dataset-download-mirror/) to download the YCB_Video dataset.
 
 ### (1) (Optional) Using Windows via WSL
 
