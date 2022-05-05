@@ -3,7 +3,7 @@
 ![](assets/drill.gif)
 ![](assets/ycb_3.gif)
 ![](assets/ycb_10.gif)
-![](assets/ycb_15.gif)
+<!-- ![](assets/ycb_15.gif) -->
 
 Final report is in report.pdf
 
