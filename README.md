@@ -1,6 +1,11 @@
 # Pose-Estimation
 
 ![](assets/drill.gif)
+![](assets/ycb_3.gif)
+![](assets/ycb_10.gif)
+![](assets/ycb_15.gif)
+
+Final report is in report.pdf
 
 ## Installation
 
@@ -178,8 +183,6 @@ apt install -y python3-opengl libgl1-mesa-glx libglu1-mesa
 
 ## Operating procedure
 
-### (1) Collect images using `capture.py`
-
 Create a test directory to store the images in.
 ```bash
 mkdir trial_run
@@ -192,10 +195,10 @@ python capture.py --output trial_run --visualize
 
 Run the segmentation algorithm. 
 ```bash
-TODO
+-
 ```
 
-Run the pose estimation algorithm in docker.
+Run the pose estimation algorithm in docker. By default it will use depth masking.
 ```bash
 ./eval_real.sh trial_run
 ```
@@ -208,3 +211,5 @@ Run the pose visualization.
 Open up the `trial_run.gif` to see the results.
 
 ## Results
+Left: input RGB. Middle: depth mask. Right: oriented model.
+![](assets/test_capture2.gif)

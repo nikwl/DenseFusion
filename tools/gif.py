@@ -219,9 +219,9 @@ while 1:
     img_list.append(
         np.hstack((
             np.array(img),
+            utils_3d.colorize_image(depth_mask(depth), cmap="gray")[:, :, :3],
             pose_img,
             # ((np.array(img).astype(float) + pose_img) / 2).astype(np.uint8),
-            # utils_3d.colorize_image(depth_mask(depth), cmap="gray")[:, :, :3]
         )), 
     )
 
