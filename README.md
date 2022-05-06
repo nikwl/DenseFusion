@@ -181,6 +181,10 @@ apt install -y freeglut3-dev freeglut3 libgl1-mesa-dev libglu1-mesa-dev libxext-
 apt install -y python3-opengl libgl1-mesa-glx libglu1-mesa
 ```
 
+## (4) Segmentation 
+
+Segmentation ended up being a hosted in a (different repo)[https://github.com/desichic/Segmentation]. Please follow its respective installation instructions.
+
 ## Operating procedure
 
 Create a test directory to store the images in.
